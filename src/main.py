@@ -39,6 +39,39 @@ def handle_menu_choice(choice: int) -> bool:
             input("Naciśnij Enter, aby kontynuować.")
         case 6:
             print("6. Wyświetl ofertę zabiegów - sortowanie wg kryteriów")
+            while True:
+                print("1.Sortuj po cenie rosnąco")
+                print("2.Sortuj po cenie malejąco")
+                print("3.Pokaż tylko dostępne")
+                print("4.Pokaż tylko niedostępne")
+                print("0. Wyjście")
+                choice = input("Wybierz opcję (0-4): ").strip()
+                if choice not in ["0","1","2","3","4"]:
+                    print("Błąd: Nie ma takiej opcji! Wypisz cyfrę od 0 do 4")
+                    input("Naciśnij Enter aby kontynuować")
+                    continue
+                if choice == "0":
+                    break
+                elif choice == "1":
+                    output = sorted(vet_catalog, key=lambda x: x["price"])
+                    title ="=== Produkty posortowane po cenie rosnąco ==="
+                elif choice == "2":
+                    output = sorted(vet_catalog, key=lambda x: x["price"], reverse=True)
+                    title = "=== Produkty posortowane po cenie malejąco ==="
+                elif choice == "3":
+                    output = [p for p in vet_catalog if p["available"] == True]
+                    title = "=== Produkty dostępne ==="
+                elif choice == "4":
+                    output = [p for p in vet_catalog if p["available"] == False]
+                    title = "=== Produkty niedostępne ==="
+                print(f"\n{title}")
+                print(f"{'ID':<5} | {'Nazwa':<30} | {'Cena':<10} | {'Dostępny'}")
+                print("-"*50)
+
+                for p in output:
+                    status = "Tak" if p["available"] else "Nie"
+                    print(f"{p['id']:<5} | {p['name']:<30} | {p['price']:<10} | {status}")
+                input("\nNaciśnij enter aby wrócić do menu")
         case 7 | "q" | "exit":
             print("Zamykanie programu. Do widzenia!")
             return False # Przypisuje wartość False do zmiennej 'running', tym samym kończąc działanie pętli
