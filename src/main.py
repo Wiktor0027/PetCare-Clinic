@@ -1,6 +1,7 @@
 from validators import get_int_input
 
 
+# Obsługa pozycji menu
 def handle_menu_choice(choice: int) -> bool:
     match choice:
         case 1:
@@ -11,11 +12,12 @@ def handle_menu_choice(choice: int) -> bool:
             print("3. Umówione wizyty")
         case 4 | "q" | "exit":
             print("Zamykanie programu. Do widzenia!")
-            return False
+            return False # Przypisuje wartość False do zmiennej 'running', tym samym kończąc działanie pętli
         case _:
             print("Błąd: Niewłaściwy wybór. Wybierz wartość pomiędzy 1 a 4.")
-    return True
+    return True # Przypisuje wartość True do zmiennej 'running', kontynuując działanie pętli
 
+# Wyświetlenie menu
 def print_menu():
     print("\n" + "=" * 40)
     print("   System zarządzania Kliniki PetCare")
@@ -27,6 +29,7 @@ def print_menu():
     print("-" * 40)
 
 def main():
+    # Nieskończona pętla menu CLI
     running = True
     while running:
         print_menu()
@@ -34,5 +37,6 @@ def main():
         running = handle_menu_choice(user_choice)
 
 
+# Zapobiega samowolnemu uruchomieniu funkcji main() przy imporcie
 if __name__ == "__main__":
     main()
