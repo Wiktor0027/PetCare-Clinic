@@ -18,7 +18,7 @@ def handle_menu_choice(choice: int) -> bool:
 
 def print_menu():
     print("\n" + "=" * 40)
-    print("     System zarządzania Kliniki PetCare     ")
+    print("   System zarządzania Kliniki PetCare")
     print("=" * 40)
     print("1. Teleporada")
     print("2. Umów się na wizytę")
