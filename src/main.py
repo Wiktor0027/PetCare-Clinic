@@ -15,28 +15,28 @@ def handle_menu_choice(choice: int) -> bool:
         case 4:
             print("\nOferta zabiegów")
             display_items(vet_catalog)
+            input("\nNaciśnij Enter, aby kontynuować.")
         case 5:
             print("\nDodaj nowy zabieg")
             name = ""
             while not get_non_empty_string(name):
-                name = input("\nWprowadź nazwę: ")
-            price = get_int_input("\nWprowadź cenę: ", 0)
-            availability = get_int_input("\nOkreśl dostępność (1 - Tak, 2 - Nie): ", 1, 2)
+                name = input("\nWprowadź nazwę: ").strip()
+            price = get_int_input("Wprowadź cenę: ", 0)
+            availability = get_int_input("Określ dostępność (1 - Tak, 2 - Nie): ", 1, 2)
             if (availability == 1):
                 availability = True
             else:
                 availability = False
 
-            new_item_data = [
-                {
-                    "name": name,
-                    "price": price,
-                    "available": availability
-                }
-            ]
+            new_item_data = {
+                "name": name,
+                "price": price,
+                "available": availability
+            }
 
             add_item(vet_catalog, new_item_data)
             print("\nPomyślnie dodano nowy zabieg.")
+            input("Naciśnij Enter, aby kontynuować.")
         case 6:
             print("6. Wyświetl ofertę zabiegów - sortowanie wg kryteriów")
         case 7 | "q" | "exit":
