@@ -31,5 +31,5 @@ active_order = {
         {"id": 1, "qty": 3, "price":100.00}
     ],
     "is_paid": True,
-    "referral program": True,
+    "referral_program": True,
 }#model aktywnego zamowienia klienta
