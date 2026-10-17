@@ -3,7 +3,7 @@ from json import JSONDecodeError
 
 import data
 # from data import vet_catalog # Pozostałość po zadaniu 1
-from services import display_items, add_item
+from services import display_items, add_item, update_prices
 from validators import get_int_input, get_non_empty_string, get_float_input
 
 # Ładowanie bazy danych zabiegów z pliku JSON
@@ -24,11 +24,11 @@ except JSONDecodeError:
 def handle_menu_choice(choice: int) -> bool:
     match choice:
         case 1:
-            print("1. Teleporada")
+            print("1. Teleporada")#do zmiany
         case 2:
-            print("2. Umów się na wizytę")
+            print("2. Umów się na wizytę")#do zmiany
         case 3:
-            print("3. Umówione wizyty")
+            print("3. Umówione wizyty")#Do zmiany
         case 4:
             print("\nOferta zabiegów")
             display_items(vet_catalog)
@@ -98,7 +98,11 @@ def handle_menu_choice(choice: int) -> bool:
                     status = "Tak" if p["available"] else "Nie"
                     print(f"{p['id']:<5} | {p['name']:<30} | {p['price']:<10} | {status}")
                 input("\nNaciśnij enter aby wrócić do menu")
-        case 7 | "q" | "exit":
+        case 7:
+            update_prices("vet_catalog.json","cennik.csv")
+            input("Naciśnij Enter, aby kontynuować.")
+
+        case 8 | "q" | "exit":
             print("Zamykanie programu. Do widzenia!")
             return False # Przypisuje wartość False do zmiennej 'running', tym samym kończąc działanie pętli
         case _:
@@ -116,7 +120,8 @@ def print_menu():
     print("4. Wyświetl ofertę zabiegów")
     print("5. Dodaj nowy zabieg do oferty")
     print("6. Wyświetl ofertę zabiegów - sortowanie wg kryteriów")
-    print("7. Wyjście z programu")
+    print("7. Zaktualizuj ceny")
+    print("8. Wyjście z programu")
     print("-" * 40)
 
 def main():
@@ -124,7 +129,7 @@ def main():
     running = True
     while running:
         print_menu()
-        user_choice = get_int_input("\nWprowadź swój wybór [1-7]: ", 1, 7)
+        user_choice = get_int_input("\nWprowadź swój wybór [1-8]: ", 1, 8)
         running = handle_menu_choice(user_choice)
 
 
