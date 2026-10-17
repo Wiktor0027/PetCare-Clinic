@@ -4,7 +4,7 @@ from json import JSONDecodeError
 import data
 # from data import vet_catalog # Pozostałość po zadaniu 1
 from services import display_items, add_item
-from validators import get_int_input, get_non_empty_string
+from validators import get_int_input, get_non_empty_string, get_float_input
 
 # Ładowanie bazy danych zabiegów z pliku JSON
 try:
@@ -38,7 +38,7 @@ def handle_menu_choice(choice: int) -> bool:
             name = ""
             while not get_non_empty_string(name):
                 name = input("\nWprowadź nazwę: ").strip()
-            price = get_int_input("Wprowadź cenę: ", 0)
+            price = get_float_input("Wprowadź cenę: ", 0.01)
             availability = get_int_input("Określ dostępność (1 - Tak, 2 - Nie): ", 1, 2)
             if (availability == 1):
                 availability = True
