@@ -1,4 +1,4 @@
-from data import vet_catalog, active_order
+# from data import vet_catalog, active_order
 def display_items(items_list):
     print(f"{'ID':<4} | {'Nazwa':<25} | {'Cena':<10} | {'Dostepny':<10}")
     print("-"*57)

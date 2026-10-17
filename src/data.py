@@ -1,4 +1,5 @@
-vet_catalog= [
+# Kopia zapasowa na wypadek błędu odczytu pliku JSON - ustawienia fabryczne
+vet_catalog = [
     {
         "id": 1,
         "name": "Szczepienia ochronne",

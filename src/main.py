@@ -1,7 +1,24 @@
-from data import vet_catalog
+import json
+from json import JSONDecodeError
+
+import data
+# from data import vet_catalog # Pozostałość po zadaniu 1
 from services import display_items, add_item
 from validators import get_int_input, get_non_empty_string
 
+# Ładowanie bazy danych zabiegów z pliku JSON
+try:
+    with open("vet_catalog.json", "r") as file:
+        vet_catalog = json.load(file)
+except FileNotFoundError:
+    print("Błąd: Plik nie istnieje.")
+    vet_catalog = data.vet_catalog # Odczyt kopii zapasowej w przypadku błędu odczytu pliku
+except PermissionError:
+    print("Błąd: Brak dostępu do pliku.")
+    vet_catalog = data.vet_catalog # Odczyt kopii zapasowej w przypadku błędu odczytu pliku
+except JSONDecodeError:
+    print("Błąd: Nie udało się odczytać pliku.")
+    vet_catalog = data.vet_catalog # Odczyt kopii zapasowej w przypadku błędu odczytu pliku
 
 # Obsługa pozycji menu
 def handle_menu_choice(choice: int) -> bool:
@@ -35,6 +52,15 @@ def handle_menu_choice(choice: int) -> bool:
             }
 
             add_item(vet_catalog, new_item_data)
+            try:
+                loadJSON = open("vet_catalog.json", "w")
+                loadJSON.write(json.dumps(vet_catalog))
+                loadJSON.close()
+            except FileNotFoundError:
+                print("Błąd: Plik nie istnieje.")
+            except PermissionError:
+                print("Błąd: Brak dostępu do pliku.")
+
             print("\nPomyślnie dodano nowy zabieg.")
             input("Naciśnij Enter, aby kontynuować.")
         case 6:
