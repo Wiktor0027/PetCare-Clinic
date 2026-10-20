@@ -1,7 +1,3 @@
-import json,csv
-from json import JSONDecodeError
-
-
 def display_items(items_list):
     print(f"{'ID':<4} | {'Nazwa':<25} | {'Cena':<10} | {'Dostepny':<10}")
     print("-"*57)
@@ -23,16 +19,3 @@ def add_item(items_list, new_items_data):
     items_list.append(new_record)
     print(f"Dodano pomyslnie (ID: {new_id}): {new_record}")
     return new_record
-
-
-def update_prices(database,price_path):
-    with open(database) as json_file:
-        datab = json.load(json_file)
-    with open(price_path) as csv_file:
-        prices = {int(row["id"]): float(row["price"].replace(",",".")) for row in csv.DictReader(csv_file)}
-    for product in datab:
-        if product["id"] in prices:
-            product["price"] = prices[product["id"]]
-    with open(database, "w") as json_file:
-        json.dump(datab,json_file,ensure_ascii=False,indent=2)
-

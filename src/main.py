@@ -1,39 +1,19 @@
-import json
-from json import JSONDecodeError
-
-import data
 # from data import vet_catalog # Pozostałość po zadaniu 1
-from services import display_items, add_item, update_prices
+from services import display_items, add_item
+from storage import load_database, save_database, update_prices
 from validators import get_int_input, get_non_empty_string, get_float_input
-
-# Ładowanie bazy danych zabiegów z pliku JSON
-try:
-    with open("vet_catalog.json", "r") as file:
-        vet_catalog = json.load(file)
-except FileNotFoundError:
-    print("Błąd: Plik nie istnieje.")
-    vet_catalog = data.vet_catalog # Odczyt kopii zapasowej w przypadku błędu odczytu pliku
-except PermissionError:
-    print("Błąd: Brak dostępu do pliku.")
-    vet_catalog = data.vet_catalog # Odczyt kopii zapasowej w przypadku błędu odczytu pliku
-except JSONDecodeError:
-    print("Błąd: Nie udało się odczytać pliku.")
-    vet_catalog = data.vet_catalog # Odczyt kopii zapasowej w przypadku błędu odczytu pliku
 
 # Obsługa pozycji menu
 def handle_menu_choice(choice: int) -> bool:
+    # Ładowanie bazy danych zabiegów z pliku JSON
+    vet_catalog = load_database("data/vet_catalog.json")
+
     match choice:
         case 1:
-            print("1. Teleporada")#do zmiany
-        case 2:
-            print("2. Umów się na wizytę")#do zmiany
-        case 3:
-            print("3. Umówione wizyty")#Do zmiany
-        case 4:
             print("\nOferta zabiegów")
             display_items(vet_catalog)
             input("\nNaciśnij Enter, aby kontynuować.")
-        case 5:
+        case 2:
             print("\nDodaj nowy zabieg")
             name = ""
             while not get_non_empty_string(name):
@@ -52,42 +32,31 @@ def handle_menu_choice(choice: int) -> bool:
             }
 
             add_item(vet_catalog, new_item_data)
-            try:
-                loadJSON = open("vet_catalog.json", "w")
-                loadJSON.write(json.dumps(vet_catalog))
-                loadJSON.close()
-            except FileNotFoundError:
-                print("Błąd: Plik nie istnieje.")
-            except PermissionError:
-                print("Błąd: Brak dostępu do pliku.")
+            save_database("data/vet_catalog.json", vet_catalog)
 
             print("\nPomyślnie dodano nowy zabieg.")
             input("Naciśnij Enter, aby kontynuować.")
-        case 6:
-            print("6. Wyświetl ofertę zabiegów - sortowanie wg kryteriów")
+        case 3:
+            print("\nOferta zabiegów - sortowanie wg kryteriów")
             while True:
-                print("1.Sortuj po cenie rosnąco")
-                print("2.Sortuj po cenie malejąco")
-                print("3.Pokaż tylko dostępne")
-                print("4.Pokaż tylko niedostępne")
+                print("\n1. Sortuj po cenie rosnąco")
+                print("2. Sortuj po cenie malejąco")
+                print("3. Pokaż tylko dostępne")
+                print("4. Pokaż tylko niedostępne")
                 print("0. Wyjście")
-                choice = input("Wybierz opcję (0-4): ").strip()
-                if choice not in ["0","1","2","3","4"]:
-                    print("Błąd: Nie ma takiej opcji! Wypisz cyfrę od 0 do 4")
-                    input("Naciśnij Enter aby kontynuować")
-                    continue
-                if choice == "0":
+                choice = get_int_input("\nWybierz opcję [0-4]: ", 0, 4)
+                if choice == 0:
                     break
-                elif choice == "1":
+                elif choice == 1:
                     output = sorted(vet_catalog, key=lambda x: x["price"])
                     title ="=== Produkty posortowane po cenie rosnąco ==="
-                elif choice == "2":
+                elif choice == 2:
                     output = sorted(vet_catalog, key=lambda x: x["price"], reverse=True)
                     title = "=== Produkty posortowane po cenie malejąco ==="
-                elif choice == "3":
+                elif choice == 3:
                     output = [p for p in vet_catalog if p["available"] == True]
                     title = "=== Produkty dostępne ==="
-                elif choice == "4":
+                elif choice == 4:
                     output = [p for p in vet_catalog if p["available"] == False]
                     title = "=== Produkty niedostępne ==="
                 print(f"\n{title}")
@@ -98,11 +67,11 @@ def handle_menu_choice(choice: int) -> bool:
                     status = "Tak" if p["available"] else "Nie"
                     print(f"{p['id']:<5} | {p['name']:<30} | {p['price']:<10} | {status}")
                 input("\nNaciśnij enter aby wrócić do menu")
-        case 7:
-            update_prices("vet_catalog.json","cennik.csv")
+        case 4:
+            update_prices("data/vet_catalog.json", "data/cennik.csv")
+            print("\nZaktualizowano ceny z pliku.")
             input("Naciśnij Enter, aby kontynuować.")
-
-        case 8 | "q" | "exit":
+        case 0 | "q" | "exit":
             print("Zamykanie programu. Do widzenia!")
             return False # Przypisuje wartość False do zmiennej 'running', tym samym kończąc działanie pętli
         case _:
@@ -114,14 +83,11 @@ def print_menu():
     print("\n" + "=" * 40)
     print("   System zarządzania Kliniki PetCare")
     print("=" * 40)
-    print("1. Teleporada")
-    print("2. Umów się na wizytę")
-    print("3. Umówione wizyty")
-    print("4. Wyświetl ofertę zabiegów")
-    print("5. Dodaj nowy zabieg do oferty")
-    print("6. Wyświetl ofertę zabiegów - sortowanie wg kryteriów")
-    print("7. Zaktualizuj ceny")
-    print("8. Wyjście z programu")
+    print("1. Wyświetl ofertę zabiegów")
+    print("2. Dodaj nowy zabieg do oferty")
+    print("3. Wyświetl ofertę zabiegów - sortowanie wg kryteriów")
+    print("4. Zaktualizuj ceny")
+    print("0. Wyjście z programu")
     print("-" * 40)
 
 def main():
@@ -129,7 +95,7 @@ def main():
     running = True
     while running:
         print_menu()
-        user_choice = get_int_input("\nWprowadź swój wybór [1-8]: ", 1, 8)
+        user_choice = get_int_input("\nWprowadź swój wybór [0-4]: ", 0, 4)
         running = handle_menu_choice(user_choice)
 
 
