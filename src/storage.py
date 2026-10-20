@@ -41,3 +41,14 @@ def update_prices(database, price_path):
             product["price"] = prices[product["id"]]
     with open(database, "w") as json_file:
         json.dump(datab, json_file, ensure_ascii=False, indent=2)
+
+def csv_export(csv_name):
+    with open("data/vet_catalog.json",'r') as json_file:
+        datab = json.load(json_file)
+    headers =list(datab[0].keys())
+    with open(csv_name+".csv","w",newline='') as csv_file:
+        writer = csv.DictWriter(csv_file, fieldnames=headers)
+        writer.writeheader()
+        for row in datab:
+            writer.writerow(row)
+csv_export("test11")
