@@ -46,9 +46,8 @@ def csv_export(csv_name):
     with open("data/vet_catalog.json",'r') as json_file:
         datab = json.load(json_file)
     headers =list(datab[0].keys())
-    with open(csv_name+".csv","w",newline='') as csv_file:
+    with open(csv_name + ".csv", "w", newline='') as csv_file:
         writer = csv.DictWriter(csv_file, fieldnames=headers)
         writer.writeheader()
         for row in datab:
             writer.writerow(row)
-csv_export("test11")

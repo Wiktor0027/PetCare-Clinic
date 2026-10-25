@@ -1,6 +1,6 @@
 # from data import vet_catalog # Pozostałość po zadaniu 1
 from services import display_items, add_item
-from storage import load_database, save_database, update_prices
+from storage import load_database, save_database, update_prices, csv_export
 from validators import get_int_input, get_non_empty_string, get_float_input
 
 # Obsługa pozycji menu
@@ -71,11 +71,15 @@ def handle_menu_choice(choice: int) -> bool:
             update_prices("data/vet_catalog.json", "data/cennik.csv")
             print("\nZaktualizowano ceny z pliku.")
             input("Naciśnij Enter, aby kontynuować.")
+        case 5:
+            csv_export("zabiegi")
+            print("\nPomyślnie wyeksportowano bazę danych zabiegów do pliku CSV.")
+            input("Naciśnij Enter, aby kontynuować.")
         case 0 | "q" | "exit":
             print("Zamykanie programu. Do widzenia!")
             return False # Przypisuje wartość False do zmiennej 'running', tym samym kończąc działanie pętli
         case _:
-            print("Błąd: Niewłaściwy wybór. Wybierz wartość pomiędzy 1 a 4.")
+            print("Błąd: Niewłaściwy wybór. Wybierz wartość pomiędzy 1 a 5.")
     return True # Przypisuje wartość True do zmiennej 'running', kontynuując działanie pętli
 
 # Wyświetlenie menu
@@ -87,6 +91,7 @@ def print_menu():
     print("2. Dodaj nowy zabieg do oferty")
     print("3. Wyświetl ofertę zabiegów - sortowanie wg kryteriów")
     print("4. Zaktualizuj ceny")
+    print("5. Eksportuj ofertę zabiegów do CSV")
     print("0. Wyjście z programu")
     print("-" * 40)
 
@@ -95,7 +100,7 @@ def main():
     running = True
     while running:
         print_menu()
-        user_choice = get_int_input("\nWprowadź swój wybór [0-4]: ", 0, 4)
+        user_choice = get_int_input("\nWprowadź swój wybór [0-5]: ", 0, 5)
         running = handle_menu_choice(user_choice)
 
 
