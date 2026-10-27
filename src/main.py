@@ -1,6 +1,6 @@
 # from data import vet_catalog # Pozostałość po zadaniu 1
 from services import display_items, add_item
-from storage import load_database, save_database, update_prices_report, csv_export
+from storage import load_database, save_database, atomic_save_menu, update_prices_report, csv_export
 from validators import get_int_input, get_non_empty_string, get_float_input
 # Obsługa pozycji menu
 def handle_menu_choice(choice: int) -> bool:
@@ -31,7 +31,7 @@ def handle_menu_choice(choice: int) -> bool:
             }
 
             add_item(vet_catalog, new_item_data)
-            save_database("data/vet_catalog.json", vet_catalog)
+            atomic_save_menu(vet_catalog)
 
             print("\nPomyślnie dodano nowy zabieg.")
             input("Naciśnij Enter, aby kontynuować.")
