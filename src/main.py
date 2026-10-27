@@ -1,8 +1,7 @@
 # from data import vet_catalog # Pozostałość po zadaniu 1
 from services import display_items, add_item
-from storage import load_database, save_database, update_prices, csv_export
+from storage import load_database, save_database, update_prices_report, csv_export
 from validators import get_int_input, get_non_empty_string, get_float_input
-
 # Obsługa pozycji menu
 def handle_menu_choice(choice: int) -> bool:
     # Ładowanie bazy danych zabiegów z pliku JSON
@@ -68,7 +67,7 @@ def handle_menu_choice(choice: int) -> bool:
                     print(f"{p['id']:<5} | {p['name']:<30} | {p['price']:<10} | {status}")
                 input("\nNaciśnij enter aby wrócić do menu")
         case 4:
-            update_prices("data/vet_catalog.json", "data/cennik.csv")
+            update_prices_report("data/vet_catalog.json", "data/cennik.csv")
             print("\nZaktualizowano ceny z pliku.")
             input("Naciśnij Enter, aby kontynuować.")
         case 5:
