@@ -1,32 +1,26 @@
 [
-  {
-    "id": 1,
-    "name": "Szczepienia ochronne",
-    "price": 999.0,
-    "available": true
-  },
-  {
-    "id": 2,
-    "name": "Zabiegi pielegnacyjne",
-    "price": 1.0,
-    "available": true
-  },
-  {
-    "id": 3,
-    "name": "Badania laboratoryjne",
-    "price": 2.0,
-    "available": true
-  },
-  {
-    "id": 4,
-    "name": "Kastracje i sterylizacja",
-    "price": 2137.0,
-    "available": true
-  },
-  {
-    "id": 5,
-    "name": "w",
-    "price": 2.0,
-    "available": true
-  }
+    {
+        "id": 1,
+        "name": "Szczepienia ochronne",
+        "price": 100.0,
+        "available": true
+    },
+    {
+        "id": 2,
+        "name": "Zabiegi pielegnacyjne",
+        "price": 120.0,
+        "available": true
+    },
+    {
+        "id": 3,
+        "name": "Badania laboratoryjne",
+        "price": 70.0,
+        "available": true
+    },
+    {
+        "id": 4,
+        "name": "Kastracje i sterylizacja",
+        "price": 92.99,
+        "available": true
+    },
 ]
