@@ -26,6 +26,7 @@ def load_database(name: str) -> None:
     return db
 
 def save_database(name: str, db: None) -> None:
+    backup_menu()
     try:
         with open(name, "w") as json_file:
             json.dump(db, json_file, ensure_ascii=False, indent=4)
@@ -58,7 +59,7 @@ def csv_export(csv_name):
             writer.writerow(row)
 
 def get_data_dir() -> Path:
-    dir_path = Path(__file__).resolve().parent.parent / "data"
+    dir_path = Path(__file__).resolve().parent / "data"
     dir_path.mkdir(parents=True, exist_ok=True)
     return dir_path
 
@@ -79,7 +80,7 @@ def atomic_save_menu(catalog: list[dict]) -> None:
     os.replace(temp_path, target)
 
 def backup_menu(keep: int = 3) -> Path | None:
-    source = get_data_dir()
+    source = get_data_dir() / "vet_catalog.json"
     if not source.exists():
         return None
     backup_dir = get_data_dir() / "backups"
