@@ -17,7 +17,11 @@ def handle_menu_choice(choice: int) -> bool:
             name = ""
             while not get_non_empty_string(name):
                 name = input("\nWprowadź nazwę: ").strip()
+            category = ""
+            while not get_non_empty_string(category):
+                category = input("\nWprowadź kategorię: ").strip()
             price = get_float_input("Wprowadź cenę: ", 0.01)
+            duration = get_float_input("Wprowadź czas trwania zabiegu: ", 0.01)
             availability = get_int_input("Określ dostępność (1 - Tak, 2 - Nie): ", 1, 2)
             if (availability == 1):
                 availability = True
@@ -27,7 +31,10 @@ def handle_menu_choice(choice: int) -> bool:
             new_item_data = {
                 "name": name,
                 "price": price,
-                "available": availability
+                "available": availability,
+                "category": category,
+                "duration": duration
+
             }
 
             add_item(vet_catalog, new_item_data)
