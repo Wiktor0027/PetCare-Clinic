@@ -2,11 +2,17 @@
 from services import display_items, add_item
 from storage import load_database, save_database, atomic_save_menu, update_prices_report, csv_export
 from validators import get_int_input, get_non_empty_string, get_float_input
+from models import Treatment,TreatmentCatalog
+import os
 # Obsługa pozycji menu
 def handle_menu_choice(choice: int) -> bool:
     # Ładowanie bazy danych zabiegów z pliku JSON
     vet_catalog = load_database("data/vet_catalog.json")
-
+    PATH = "data/vet_catalog.json"
+    if os.path.exists(PATH):
+        catalog = TreatmentCatalog.load(PATH)
+    else:
+        catalog = TreatmentCatalog("PetCare")
     match choice:
         case 1:
             print("\nOferta zabiegów")
@@ -81,6 +87,26 @@ def handle_menu_choice(choice: int) -> bool:
             csv_export("zabiegi")
             print("\nPomyślnie wyeksportowano bazę danych zabiegów do pliku CSV.")
             input("Naciśnij Enter, aby kontynuować.")
+        case 6:
+            print("\nDodaj nowy zabieg")
+            name = ""
+            while not get_non_empty_string(name):
+                name = input("\nWprowadź nazwę: ").strip()
+            category = ""
+            while not get_non_empty_string(category):
+                category = input("\nWprowadź kategorię: ").strip()
+            price = get_float_input("Wprowadź cenę: ", 0.01)
+            duration = get_int_input("Wprowadź czas trwania zabiegu (min): ", 1, 600)
+            availability = get_int_input("Określ dostępność (1 - Tak, 2 - Nie): ", 1, 2) == 1
+
+            try:
+                catalog.add_treatment(Treatment(name, category, price, duration, availability))
+                catalog.save(PATH)
+                print("\nPomyślnie dodano nowy zabieg.")
+            except ValueError as e:
+                print("\nNie dodano zabiegu:", e)
+
+            input("Naciśnij Enter, aby kontynuować.")
         case 0 | "q" | "exit":
             print("Zamykanie programu. Do widzenia!")
             return False # Przypisuje wartość False do zmiennej 'running', tym samym kończąc działanie pętli
@@ -98,6 +124,7 @@ def print_menu():
     print("3. Wyświetl ofertę zabiegów - sortowanie wg kryteriów")
     print("4. Zaktualizuj ceny")
     print("5. Eksportuj ofertę zabiegów do CSV")
+    print("6. test")
     print("0. Wyjście z programu")
     print("-" * 40)
 
@@ -106,7 +133,7 @@ def main():
     running = True
     while running:
         print_menu()
-        user_choice = get_int_input("\nWprowadź swój wybór [0-5]: ", 0, 5)
+        user_choice = get_int_input("\nWprowadź swój wybór [0-6]: ", 0, 6)
         running = handle_menu_choice(user_choice)
 
 
