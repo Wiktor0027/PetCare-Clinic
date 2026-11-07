@@ -20,30 +20,22 @@ def handle_menu_choice(choice: int) -> bool:
             name = ""
             while not get_non_empty_string(name):
                 name = input("\nWprowadź nazwę: ").strip()
-            category = ""
-            while not get_non_empty_string(category):
-                category = input("\nWprowadź kategorię: ").strip()
-            price = get_float_input("Wprowadź cenę: ", 0.01)
-            duration = get_float_input("Wprowadź czas trwania zabiegu: ", 0.01)
-            availability = get_int_input("Określ dostępność (1 - Tak, 2 - Nie): ", 1, 2)
-            if (availability == 1):
-                availability = True
-            else:
-                availability = False
+            print()
+            showCats()
+            category = get_int_input("\nWybierz kategorię spośród powyższych: ", 0, len(CATEGORIES) - 1)
+            price = get_float_input(
+                f"Wprowadź cenę (maks. dla wybranej kategorii: {MAX_PRICE[CATEGORIES[category]]}): ", 0.01,
+                MAX_PRICE[CATEGORIES[category]])
+            duration = get_int_input("Wprowadź czas trwania zabiegu (minuty): ", 1, 600)
+            availability = get_int_input("Określ dostępność (1 - Tak, 2 - Nie): ", 1, 2) == 1
 
-            new_item_data = {
-                "name": name,
-                "price": price,
-                "available": availability,
-                "category": category,
-                "duration": duration
+            try:
+                catalog.add_treatment(Treatment(name, CATEGORIES[category], price, duration, availability))
+                catalog.save(PATH)
+                print("\nPomyślnie dodano nowy zabieg.")
+            except ValueError as e:
+                print("\nNie dodano zabiegu:", e)
 
-            }
-
-            add_item(vet_catalog, new_item_data)
-            atomic_save_menu(vet_catalog)
-
-            print("\nPomyślnie dodano nowy zabieg.")
             input("Naciśnij Enter, aby kontynuować.")
         case 3:
             print("\nOferta zabiegów - sortowanie wg kryteriów")
@@ -84,26 +76,6 @@ def handle_menu_choice(choice: int) -> bool:
             csv_export("zabiegi")
             print("\nPomyślnie wyeksportowano bazę danych zabiegów do pliku CSV.")
             input("Naciśnij Enter, aby kontynuować.")
-        case 6:
-            print("\nDodaj nowy zabieg")
-            name = ""
-            while not get_non_empty_string(name):
-                name = input("\nWprowadź nazwę: ").strip()
-            print()
-            showCats()
-            category = get_int_input("\nWybierz kategorię spośród powyższych: ", 0, len(CATEGORIES) - 1)
-            price = get_float_input(f"Wprowadź cenę (maks. dla wybranej kategorii: {MAX_PRICE[CATEGORIES[category]]}): ", 0.01, MAX_PRICE[CATEGORIES[category]])
-            duration = get_int_input("Wprowadź czas trwania zabiegu (min): ", 1, 600)
-            availability = get_int_input("Określ dostępność (1 - Tak, 2 - Nie): ", 1, 2) == 1
-
-            try:
-                catalog.add_treatment(Treatment(name, CATEGORIES[category], price, duration, availability))
-                catalog.save(PATH)
-                print("\nPomyślnie dodano nowy zabieg.")
-            except ValueError as e:
-                print("\nNie dodano zabiegu:", e)
-
-            input("Naciśnij Enter, aby kontynuować.")
         case 0 | "q" | "exit":
             print("Zamykanie programu. Do widzenia!")
             return False # Przypisuje wartość False do zmiennej 'running', tym samym kończąc działanie pętli
@@ -121,7 +93,6 @@ def print_menu():
     print("3. Wyświetl ofertę zabiegów - sortowanie wg kryteriów")
     print("4. Zaktualizuj ceny")
     print("5. Eksportuj ofertę zabiegów do CSV")
-    print("6. test")
     print("0. Wyjście z programu")
     print("-" * 40)
 
@@ -130,7 +101,7 @@ def main():
     running = True
     while running:
         print_menu()
-        user_choice = get_int_input("\nWprowadź swój wybór [0-6]: ", 0, 6)
+        user_choice = get_int_input("\nWprowadź swój wybór [0-5]: ", 0, 5)
         running = handle_menu_choice(user_choice)
 
 
