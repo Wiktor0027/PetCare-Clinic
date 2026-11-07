@@ -2,8 +2,8 @@
 from services import display_items, add_item
 from storage import load_database, save_database, atomic_save_menu, update_prices_report, csv_export
 from validators import get_int_input, get_non_empty_string, get_float_input
-from models import Treatment,TreatmentCatalog
-import os
+from models import Treatment, TreatmentCatalog, showCats, CATEGORIES, MAX_PRICE
+
 # Obsługa pozycji menu
 def handle_menu_choice(choice: int) -> bool:
     # Ładowanie bazy danych zabiegów z pliku JSON
@@ -89,15 +89,15 @@ def handle_menu_choice(choice: int) -> bool:
             name = ""
             while not get_non_empty_string(name):
                 name = input("\nWprowadź nazwę: ").strip()
-            category = ""
-            while not get_non_empty_string(category):
-                category = input("\nWprowadź kategorię: ").strip()
-            price = get_float_input("Wprowadź cenę: ", 0.01)
+            print()
+            showCats()
+            category = get_int_input("\nWybierz kategorię spośród powyższych: ", 0, len(CATEGORIES) - 1)
+            price = get_float_input(f"Wprowadź cenę (maks. dla wybranej kategorii: {MAX_PRICE[CATEGORIES[category]]}): ", 0.01, MAX_PRICE[CATEGORIES[category]])
             duration = get_int_input("Wprowadź czas trwania zabiegu (min): ", 1, 600)
             availability = get_int_input("Określ dostępność (1 - Tak, 2 - Nie): ", 1, 2) == 1
 
             try:
-                catalog.add_treatment(Treatment(name, category, price, duration, availability))
+                catalog.add_treatment(Treatment(name, CATEGORIES[category], price, duration, availability))
                 catalog.save(PATH)
                 print("\nPomyślnie dodano nowy zabieg.")
             except ValueError as e:

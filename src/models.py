@@ -1,11 +1,27 @@
 import json
+import os
+import tempfile
 from dataclasses import dataclass, asdict
 from pathlib import Path
 
+from storage import backup_menu
+
+CATEGORIES = {
+    0: "Brak kategorii",
+    1: "Konsultacje",
+    2: "Profilaktyka",
+    3: "Chirurgia"
+}
+
+def showCats():
+    for cat in CATEGORIES:
+        print(f"{cat} - {CATEGORIES[cat]}")
+
 MAX_PRICE = {
-    "konsultacja": 300,
-    "profilaktyka": 500,
-    "chirurgia": 8000,
+    CATEGORIES[0]: 100000,
+    CATEGORIES[1]: 300,
+    CATEGORIES[2]: 500,
+    CATEGORIES[3]: 8000,
 }
 
 @dataclass
@@ -57,12 +73,25 @@ class TreatmentCatalog:
     # --- zapis i odczyt JSON ---
 
     def save(self, path):
+        backup_menu()
         data = {
             "name": self.name,
             "treatments": [asdict(t) for t in self.treatments],
         }
-        with open(path, "w", encoding="utf-8") as f:
-            json.dump(data, f, ensure_ascii=False, indent=2)
+        target = path
+        with tempfile.NamedTemporaryFile(
+            mode="w",
+            delete=False,
+            dir="data/",
+            prefix="vet_catalog_tmp_",
+            suffix=".json",
+            encoding="utf-8"
+        ) as tmp:
+            json.dump(data, tmp, ensure_ascii=False, indent=4)
+            tmp.flush()
+            os.fsync(tmp.fileno())
+            temp_path = Path(tmp.name)
+        os.replace(temp_path, target)
 
     @classmethod
     def load(cls, path, default_name="PetCare"):
