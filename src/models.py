@@ -51,6 +51,13 @@ class TreatmentCatalog:
         self.treatments = []
         self.next_id = 1       # następny wolny numer
 
+    def to_dict(self):
+        return {
+            "name": self.name,
+            "treatments": [t.to_dict() for t in self.treatments],
+        }
+
+
     def add_treatment(self, treatment):
         # 1. kategoria musi istnieć
         if treatment.category not in MAX_PRICE:
@@ -85,10 +92,7 @@ class TreatmentCatalog:
 
     def save(self, path):
         backup_menu()
-        data = {
-            "name": self.name,
-            "treatments": [t.to_dict() for t in self.treatments],
-        }
+        data = self.to_dict()
         target = path
         with tempfile.NamedTemporaryFile(
             mode="w",
