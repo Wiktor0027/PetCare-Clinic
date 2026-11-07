@@ -1,6 +1,6 @@
 import json
 from dataclasses import dataclass, asdict
-
+from pathlib import Path
 
 MAX_PRICE = {
     "konsultacja": 300,
@@ -65,12 +65,17 @@ class TreatmentCatalog:
             json.dump(data, f, ensure_ascii=False, indent=2)
 
     @classmethod
-    def load(cls, path):
-        with open(path, encoding="utf-8") as f:
-            data = json.load(f)
+    def load(cls, path, default_name="PetCare"):
+        p = Path(path)
 
-        catalog = cls(data["name"])
-        for item in data["treatments"]:
+        # brak pliku albo pusty plik -> nowy, pusty katalog
+        if not p.exists():
+            return cls(default_name)
+        text = p.read_text(encoding="utf-8").strip()
+        if not text:
+            return cls(default_name)
+        data = json.loads(text)
+        catalog = cls(data.get("name", default_name))
+        for item in data.get("treatments", []):
             catalog.add_treatment(Treatment(**item))
         return catalog
-    #poprawka

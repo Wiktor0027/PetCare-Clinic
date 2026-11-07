@@ -9,10 +9,7 @@ def handle_menu_choice(choice: int) -> bool:
     # Ładowanie bazy danych zabiegów z pliku JSON
     vet_catalog = load_database("data/vet_catalog.json")
     PATH = "data/vet_catalog.json"
-    if os.path.exists(PATH):
-        catalog = TreatmentCatalog.load(PATH)
-    else:
-        catalog = TreatmentCatalog("PetCare")
+    catalog=TreatmentCatalog.load(PATH)
     match choice:
         case 1:
             print("\nOferta zabiegów")
