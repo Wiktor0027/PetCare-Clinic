@@ -73,3 +73,4 @@ class TreatmentCatalog:
         for item in data["treatments"]:
             catalog.add_treatment(Treatment(**item))
         return catalog
+    #poprawka
