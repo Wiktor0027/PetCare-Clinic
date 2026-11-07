@@ -3,7 +3,6 @@ import os
 import tempfile
 from dataclasses import dataclass, asdict
 from pathlib import Path
-
 from storage import backup_menu
 
 CATEGORIES = {
@@ -32,6 +31,18 @@ class Treatment:
     duration_min: float
     is_active: bool = True
     treatment_id: int = None
+
+    def __lt__(self, other):
+        if not isinstance(other, Treatment):
+            return NotImplemented
+        return self.price_pln < other.price_pln
+
+    def to_dict(self):
+        return asdict(self)
+
+    @classmethod
+    def from_dict(cls, data):
+        return cls(**data)
 
 
 class TreatmentCatalog:
@@ -76,7 +87,7 @@ class TreatmentCatalog:
         backup_menu()
         data = {
             "name": self.name,
-            "treatments": [asdict(t) for t in self.treatments],
+            "treatments": [t.to_dict() for t in self.treatments],
         }
         target = path
         with tempfile.NamedTemporaryFile(
@@ -94,17 +105,21 @@ class TreatmentCatalog:
         os.replace(temp_path, target)
 
     @classmethod
-    def load(cls, path, default_name="PetCare"):
-        p = Path(path)
-
-        # brak pliku albo pusty plik -> nowy, pusty katalog
-        if not p.exists():
-            return cls(default_name)
-        text = p.read_text(encoding="utf-8").strip()
-        if not text:
-            return cls(default_name)
-        data = json.loads(text)
-        catalog = cls(data.get("name", default_name))
-        for item in data.get("treatments", []):
-            catalog.add_treatment(Treatment(**item))
+    def from_dict(cls, data):
+        catalog = cls(data["name"])
+        for item in data["treatments"]:
+            catalog.add_treatment(Treatment.from_dict(item))
         return catalog
+    def __eq__(self, other):
+        if not isinstance(other, TreatmentCatalog):
+            return NotImplemented
+        return self.name == other.name and self.treatments == other.treatments
+    @classmethod
+    def load(cls, path, default_name="PetCare"):
+       if not os.path.exists(path):
+           return cls(default_name)
+
+       with open(path, encoding="utf-8-sig") as f:
+           content = f.read().strip()
+       if not content:
+           return cls(default_name)
