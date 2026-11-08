@@ -27,9 +27,9 @@ MAX_PRICE = {
 class Treatment:
     name: str
     price_pln: float
-    duration_min: float
+    duration_min: int
     is_active: bool = True
-    treatment_id: int = None
+    treatment_id: int | None = None
 
     category = CATEGORIES[0]
     def final_price(self):
@@ -47,8 +47,8 @@ class Treatment:
 
     @classmethod
     def from_dict(cls, data):
-        d=dict(data)
-        category = d.pop("category",CATEGORIES[0])
+        d = dict(data)
+        category = d.pop("category", CATEGORIES[0])
         kind = TYPES.get(category)
         if kind is None:
             raise ValueError("Nieznana kategoria: " + str(category))
@@ -78,16 +78,15 @@ class TreatmentCatalog:
         self.treatments = []
         self.next_id = 1       # następny wolny numer
 
-    def to_dict(self):
-        return {
-            "name": self.name,
-            "treatments": [t.to_dict() for t in self.treatments],
-        }
-
-
     def add_treatment(self, treatment):
         if treatment.category not in MAX_PRICE:
             raise ValueError(f"Nieznana kategoria: {treatment.category}")
+        if treatment.price_pln <= 0:
+            raise ValueError("Cena musi być większa od zera")
+        if treatment.duration_min <= 0:
+            raise ValueError("Czas trwania musi być większy od zera")
+        if treatment.price_pln > MAX_PRICE[treatment.category]:
+            raise ValueError(f"Za wysoka cena dla kategorii {treatment.category}")
 
         if treatment.treatment_id is None:
             treatment.treatment_id = self.next_id
@@ -130,8 +129,8 @@ class TreatmentCatalog:
 
     @classmethod
     def from_dict(cls, data):
-        catalog = cls(data["name"])
-        for item in data["treatments"]:
+        catalog = cls(data.get("name", "PetCare"))
+        for item in data.get("treatments", []):
             catalog.add_treatment(Treatment.from_dict(item))
         return catalog
 
