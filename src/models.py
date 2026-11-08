@@ -88,12 +88,6 @@ class TreatmentCatalog:
     def add_treatment(self, treatment):
         if treatment.category not in MAX_PRICE:
             raise ValueError(f"Nieznana kategoria: {treatment.category}")
-        if treatment.price_pln <= 0:
-            raise ValueError("Cena musi być większa od zera")
-        if treatment.duration_min <= 0:
-            raise ValueError("Czas trwania musi być większy od zera")
-        if treatment.price_pln > MAX_PRICE[treatment.category]:
-            raise ValueError(f"Za wysoka cena dla kategorii {treatment.category}")
 
         if treatment.treatment_id is None:
             treatment.treatment_id = self.next_id

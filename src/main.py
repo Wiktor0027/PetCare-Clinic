@@ -1,19 +1,18 @@
-# from data import vet_catalog # Pozostałość po zadaniu 1
-from services import display_items, add_item
-from storage import load_database, save_database, atomic_save_menu, update_prices_report, csv_export
+from services import display_items
+from storage import update_prices_report, csv_export
 from validators import get_int_input, get_non_empty_string, get_float_input
-from models import Treatment, TreatmentCatalog, showCats, CATEGORIES, MAX_PRICE
+from models import TreatmentCatalog, showCats, CATEGORIES, MAX_PRICE, CLASS_BY_ID
+
 
 # Obsługa pozycji menu
 def handle_menu_choice(choice: int) -> bool:
     # Ładowanie bazy danych zabiegów z pliku JSON
-    vet_catalog = load_database("data/vet_catalog.json")
     PATH = "data/vet_catalog.json"
-    catalog=TreatmentCatalog.load(PATH)
+    catalog = TreatmentCatalog.load(PATH)
     match choice:
         case 1:
             print("\nOferta zabiegów")
-            display_items(vet_catalog)
+            display_items(catalog.treatments)
             input("\nNaciśnij Enter, aby kontynuować.")
         case 2:
             print("\nDodaj nowy zabieg")
@@ -30,7 +29,8 @@ def handle_menu_choice(choice: int) -> bool:
             availability = get_int_input("Określ dostępność (1 - Tak, 2 - Nie): ", 1, 2) == 1
 
             try:
-                catalog.add_treatment(Treatment(name, CATEGORIES[category], price, duration, availability))
+                treatment = CLASS_BY_ID[category](name, price, duration, availability)
+                catalog.add_treatment(treatment)
                 catalog.save(PATH)
                 print("\nPomyślnie dodano nowy zabieg.")
             except ValueError as e:
@@ -49,24 +49,20 @@ def handle_menu_choice(choice: int) -> bool:
                 if choice == 0:
                     break
                 elif choice == 1:
-                    output = sorted(vet_catalog, key=lambda x: x["price"])
+                    output = catalog.sorted_by_price()
                     title ="=== Produkty posortowane po cenie rosnąco ==="
                 elif choice == 2:
-                    output = sorted(vet_catalog, key=lambda x: x["price"], reverse=True)
+                    output = catalog.sorted_by_price(True)
                     title = "=== Produkty posortowane po cenie malejąco ==="
                 elif choice == 3:
-                    output = [p for p in vet_catalog if p["available"] == True]
+                    output = catalog.only_active()
                     title = "=== Produkty dostępne ==="
                 elif choice == 4:
-                    output = [p for p in vet_catalog if p["available"] == False]
+                    output = catalog.only_inactive()
                     title = "=== Produkty niedostępne ==="
                 print(f"\n{title}")
-                print(f"{'ID':<5} | {'Nazwa':<30} | {'Cena':<10} | {'Dostępny'}")
-                print("-"*50)
+                display_items(output)
 
-                for p in output:
-                    status = "Tak" if p["available"] else "Nie"
-                    print(f"{p['id']:<5} | {p['name']:<30} | {p['price']:<10} | {status}")
                 input("\nNaciśnij enter aby wrócić do menu")
         case 4:
             update_prices_report("data/vet_catalog.json", "data/cennik.csv")
