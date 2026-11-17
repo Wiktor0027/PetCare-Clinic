@@ -1,14 +1,22 @@
-from services import display_items
-from storage import update_prices_report, csv_export
-from validators import get_int_input, get_non_empty_string, get_float_input
-from models import TreatmentCatalog, showCats, CATEGORIES, MAX_PRICE, CLASS_BY_ID
+from pathlib import Path
 
+from services import display_items
+from sqlite_storage import (
+    add_treatment as save_treatment,
+    csv_export,
+    load_catalog,
+    update_prices_report,
+)
+from validators import get_int_input, get_non_empty_string, get_float_input
+from models import showCats, CATEGORIES, MAX_PRICE, CLASS_BY_ID
+
+DATA_DIR = Path(__file__).resolve().parent / "data"
+EXPORT_PATH = Path(__file__).resolve().parent / "zabiegi.csv"
 
 # Obsługa pozycji menu
 def handle_menu_choice(choice: int) -> bool:
-    # Ładowanie bazy danych zabiegów z pliku JSON
-    PATH = "data/vet_catalog.json"
-    catalog = TreatmentCatalog.load(PATH)
+    # Wczytaj katalog z bazy SQLite.
+    catalog = load_catalog()
     match choice:
         case 1:
             print("\nOferta zabiegów")
@@ -31,7 +39,7 @@ def handle_menu_choice(choice: int) -> bool:
             try:
                 treatment = CLASS_BY_ID[category](name, price, duration, availability)
                 catalog.add_treatment(treatment)
-                catalog.save(PATH)
+                save_treatment(treatment)
                 print("\nPomyślnie dodano nowy zabieg.")
             except ValueError as e:
                 print("\nNie dodano zabiegu:", e)
@@ -64,12 +72,14 @@ def handle_menu_choice(choice: int) -> bool:
                 display_items(output)
 
                 input("\nNaciśnij enter aby wrócić do menu")
-        case 4:
-            update_prices_report("data/vet_catalog.json", "data/cennik.csv")
-            print("\nZaktualizowano ceny z pliku.")
+        case 4: #do poprawy
+            updated, errors = update_prices_report(DATA_DIR / "cennik.csv")
+            print(f"\nZaktualizowano ceny dla {updated} zabiegów.")
+            for error in errors:
+                print(error)
             input("Naciśnij Enter, aby kontynuować.")
-        case 5:
-            csv_export("zabiegi")
+        case 5: #do poprawy
+            csv_export(EXPORT_PATH)
             print("\nPomyślnie wyeksportowano bazę danych zabiegów do pliku CSV.")
             input("Naciśnij Enter, aby kontynuować.")
         case 0 | "q" | "exit":
