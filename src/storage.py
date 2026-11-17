@@ -6,7 +6,6 @@ import shutil
 import tempfile
 from json import JSONDecodeError
 from pathlib import Path
-
 import data
 
 
@@ -90,6 +89,7 @@ def backup_menu(keep: int = 3) -> Path | None:
     shutil.copy2(source, target_backup)
 
     current_backups = sorted(backup_dir.glob("vet_catalog_*.bak"))
+    print()
     while len(current_backups) > keep:
         oldest = current_backups.pop(0)
         oldest.unlink(missing_ok=True)

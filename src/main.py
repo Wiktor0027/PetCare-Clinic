@@ -1,4 +1,6 @@
 from pathlib import Path
+from datetime import date
+import sqlite3
 
 from services import display_items
 from sqlite_storage import (
@@ -9,6 +11,7 @@ from sqlite_storage import (
 )
 from validators import get_int_input, get_non_empty_string, get_float_input
 from models import showCats, CATEGORIES, MAX_PRICE, CLASS_BY_ID
+from patient_repository import PatientRepository
 
 DATA_DIR = Path(__file__).resolve().parent / "data"
 EXPORT_PATH = Path(__file__).resolve().parent / "zabiegi.csv"
@@ -82,11 +85,75 @@ def handle_menu_choice(choice: int) -> bool:
             csv_export(EXPORT_PATH)
             print("\nPomyślnie wyeksportowano bazę danych zabiegów do pliku CSV.")
             input("Naciśnij Enter, aby kontynuować.")
+        case 6:
+            print("\nRejestracja pacjenta")
+            name = input("Imię pacjenta: ").strip()
+            while not get_non_empty_string(name):
+                name = input("Imię pacjenta nie może być puste: ").strip()
+
+            print("1. Pies\n2. Kot\n3. Gryzon")
+            species = {1: "Pies", 2: "Kot", 3: "Gryzon"}[
+                get_int_input("Wybierz gatunek [1-3]: ", 1, 3)
+            ]
+            owner_phone = input("Telefon właściciela: ").strip()
+            while not get_non_empty_string(owner_phone):
+                owner_phone = input("Telefon nie może być pusty: ").strip()
+
+            visits = []
+            if get_int_input("Dodać wizytę? (1 - Tak, 2 - Nie): ", 1, 2) == 1:
+                visit_date = input("Data wizyty (RRRR-MM-DD): ").strip()
+                while True:
+                    try:
+                        date.fromisoformat(visit_date)
+                        break
+                    except ValueError:
+                        visit_date = input("Podaj poprawną datę RRRR-MM-DD: ").strip()
+                diagnosis = input("Opis / diagnoza: ").strip()
+                while not get_non_empty_string(diagnosis):
+                    diagnosis = input("Opis nie może być pusty: ").strip()
+                cost = get_float_input("Koszt wizyty w PLN: ", 0)
+                completed = get_int_input(
+                    "Czy wizyta została zakończona? (1 - Tak, 2 - Nie): ", 1, 2
+                ) == 1
+                visits.append({
+                    "visit_date": visit_date,
+                    "diagnosis": diagnosis,
+                    "cost_pln": cost,
+                    "is_completed": completed,
+                })
+
+            patient = {
+                "name": name,
+                "species": species,
+                "owner_phone": owner_phone,
+                "medical_visits": visits,
+            }
+            try:
+                patient_id = PatientRepository().save_patient(patient)
+                print(f"\nDodano pacjenta. Jego ID to: {patient_id}")
+            except (KeyError, ValueError, sqlite3.Error) as error:
+                print(f"\nNie udało się dodać pacjenta: {error}")
+            input("Naciśnij Enter, aby kontynuować.")
+        case 7:
+            patient_id = get_int_input("Podaj ID pacjenta: ", 1)
+            patient = PatientRepository().get_patient(patient_id)
+            if patient is None:
+                print("\nNie znaleziono pacjenta o takim ID.")
+            else:
+                display_patient(patient)
+            input("Naciśnij Enter, aby kontynuować.")
+        case 8:
+            patients = PatientRepository().list_patients()
+            if not patients:
+                print("\nBrak zapisanych pacjentów.")
+            for patient in patients:
+                display_patient(patient)
+            input("Naciśnij Enter, aby kontynuować.")
         case 0 | "q" | "exit":
             print("Zamykanie programu. Do widzenia!")
             return False # Przypisuje wartość False do zmiennej 'running', tym samym kończąc działanie pętli
         case _:
-            print("Błąd: Niewłaściwy wybór. Wybierz wartość pomiędzy 1 a 5.")
+            print("Błąd: Wybierz wartość pomiędzy 0 a 8.")
     return True # Przypisuje wartość True do zmiennej 'running', kontynuując działanie pętli
 
 # Wyświetlenie menu
@@ -99,6 +166,9 @@ def print_menu():
     print("3. Wyświetl ofertę zabiegów - sortowanie wg kryteriów")
     print("4. Zaktualizuj ceny")
     print("5. Eksportuj ofertę zabiegów do CSV")
+    print("6. Dodaj pacjenta")
+    print("7. Odczytaj pacjenta po ID")
+    print("8. Wyświetl wszystkich pacjentów")
     print("0. Wyjście z programu")
     print("-" * 40)
 
@@ -107,8 +177,23 @@ def main():
     running = True
     while running:
         print_menu()
-        user_choice = get_int_input("\nWprowadź swój wybór [0-5]: ", 0, 5)
+        user_choice = get_int_input("\nWprowadź swój wybór [0-8]: ", 0, 8)
         running = handle_menu_choice(user_choice)
+
+
+def display_patient(patient):
+    print(f"\nID: {patient['patient_id']} | Pacjent: {patient['name']}")
+    print(f"Gatunek: {patient['species']} | Telefon właściciela: {patient['owner_phone']}")
+    if not patient["medical_visits"]:
+        print("Wizyty: brak")
+        return
+    print("Wizyty:")
+    for visit in patient["medical_visits"]:
+        status = "zakończona" if visit["is_completed"] else "niezakończona"
+        print(
+            f"  - {visit['visit_date']}: {visit['diagnosis']}; "
+            f"{visit['cost_pln']:.2f} zł; {status}"
+        )
 
 
 # Zapobiega samowolnemu uruchomieniu funkcji main() przy imporcie

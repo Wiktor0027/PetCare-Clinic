@@ -63,6 +63,41 @@ class PatientRepository:
         finally:
             connection.close()
 
+    def list_patients(self):
+        """Pobierz wszystkich pacjentów razem z ich wizytami."""
+        connection = get_connection(self.db_path)
+        try:
+            rows = connection.execute("""
+                SELECT p.patient_id, p.name, p.species, p.owner_phone,
+                       v.visit_id, v.visit_date, v.diagnosis, v.cost_pln, v.is_completed
+                FROM patients AS p
+                LEFT JOIN medical_visits AS v ON v.patient_id = p.patient_id
+                ORDER BY p.patient_id, v.visit_id
+            """).fetchall()
+            patients = {}
+            for row in rows:
+                patient_id = row["patient_id"]
+                if patient_id not in patients:
+                    patients[patient_id] = {
+                        "patient_id": patient_id,
+                        "name": row["name"],
+                        "species": row["species"],
+                        "owner_phone": row["owner_phone"],
+                        "medical_visits": [],
+                    }
+                if row["visit_id"] is not None:
+                    patients[patient_id]["medical_visits"].append({
+                        "visit_id": row["visit_id"],
+                        "patient_id": patient_id,
+                        "visit_date": row["visit_date"],
+                        "diagnosis": row["diagnosis"],
+                        "cost_pln": row["cost_pln"],
+                        "is_completed": row["is_completed"],
+                    })
+            return list(patients.values())
+        finally:
+            connection.close()
+
     def delete_patient(self, patient_id):
         """Usuń pacjenta; baza automatycznie usunie również jego wizyty."""
         connection = get_connection(self.db_path)

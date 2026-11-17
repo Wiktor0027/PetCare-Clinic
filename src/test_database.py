@@ -56,6 +56,9 @@ def test_repository_save_read_and_cascade_delete():
         assert patient["name"] == "Burek"
         assert len(patient["medical_visits"]) == 1
         assert patient["medical_visits"][0]["diagnosis"] == "Kontrola"
+        listed_patients = repository.list_patients()
+        assert len(listed_patients) == 1
+        assert listed_patients[0]["patient_id"] == patient_id
 
         assert repository.delete_patient(patient_id) is True
         connection = get_connection(db_path)

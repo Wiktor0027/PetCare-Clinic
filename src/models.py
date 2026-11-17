@@ -30,7 +30,6 @@ class Treatment:
     duration_min: int
     is_active: bool = True
     treatment_id: int | None = None
-
     category = CATEGORIES[0]
     def final_price(self):
         return self.price_pln
