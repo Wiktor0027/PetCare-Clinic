@@ -12,6 +12,7 @@ from sqlite_storage import (
 from validators import get_int_input, get_non_empty_string, get_float_input
 from models import showCats, CATEGORIES, MAX_PRICE, CLASS_BY_ID
 from patient_repository import PatientRepository
+from analytics import ClinicAnalytics, format_table
 
 DATA_DIR = Path(__file__).resolve().parent / "data"
 EXPORT_PATH = Path(__file__).resolve().parent / "zabiegi.csv"
@@ -75,13 +76,13 @@ def handle_menu_choice(choice: int) -> bool:
                 display_items(output)
 
                 input("\nNaciśnij enter aby wrócić do menu")
-        case 4: #do poprawy
+        case 4:
             updated, errors = update_prices_report(DATA_DIR / "cennik.csv")
             print(f"\nZaktualizowano ceny dla {updated} zabiegów.")
             for error in errors:
                 print(error)
             input("Naciśnij Enter, aby kontynuować.")
-        case 5: #do poprawy
+        case 5:
             csv_export(EXPORT_PATH)
             print("\nPomyślnie wyeksportowano bazę danych zabiegów do pliku CSV.")
             input("Naciśnij Enter, aby kontynuować.")
@@ -149,11 +150,65 @@ def handle_menu_choice(choice: int) -> bool:
             for patient in patients:
                 display_patient(patient)
             input("Naciśnij Enter, aby kontynuować.")
+        case 9:
+            print("\nRaport pacjentów (wizyty i koszty)")
+            rows = ClinicAnalytics().patient_report()
+            format_table(rows, [
+                ("patient_id", "ID", 4), ("name", "Pacjent", 18),
+                ("species", "Gatunek", 8), ("visits", "Wizyty", 7),
+                ("total_cost", "Suma PLN", 10), ("avg_cost", "Śr. PLN", 10),
+            ], "Brak zapisanych pacjentów.")
+            input("\nNaciśnij Enter, aby kontynuować.")
+        case 10:
+            print("\nRaport według gatunków")
+            date_from = input("Od daty (RRRR-MM-DD, Enter = bez ograniczenia): ").strip() or None
+            date_to = input("Do daty (RRRR-MM-DD, Enter = bez ograniczenia): ").strip() or None
+            try:
+                for value in (date_from, date_to):
+                    if value:
+                        date.fromisoformat(value)
+                rows = ClinicAnalytics().species_report(date_from, date_to)
+                format_table(rows, [
+                    ("species", "Gatunek", 8), ("patients", "Pacjenci", 9),
+                    ("visits", "Wizyty", 7), ("total_cost", "Suma PLN", 10),
+                    ("avg_cost", "Śr. PLN", 10),
+                ])
+            except ValueError:
+                print("\nNiepoprawny format daty.")
+            input("\nNaciśnij Enter, aby kontynuować.")
+        case 11:
+            year = get_int_input("Podaj rok: ", 1900, 2100)
+            print(f"\nPrzychód miesięczny z zakończonych wizyt w {year} r.:")
+            rows = ClinicAnalytics().monthly_revenue(year)
+            format_table(rows, [
+                ("month", "Miesiąc", 8), ("visits", "Wizyty", 7),
+                ("revenue", "Przychód PLN", 13), ("avg_cost", "Śr. PLN", 10),
+            ], "Brak zakończonych wizyt w tym roku.")
+            input("\nNaciśnij Enter, aby kontynuować.")
+        case 12:
+            limit = get_int_input("Ilu pacjentów pokazać? [1-50]: ", 1, 50)
+            print(f"\nTop {limit} pacjentów według łącznych kosztów")
+            rows = ClinicAnalytics().top_patients(limit)
+            format_table(rows, [
+                ("patient_id", "ID", 4), ("name", "Pacjent", 18),
+                ("species", "Gatunek", 8), ("visits", "Wizyty", 7),
+                ("total_cost", "Suma PLN", 10),
+            ], "Brak wizyt w bazie.")
+            input("\nNaciśnij Enter, aby kontynuować.")
+        case 13:
+            print("\nStatystyki katalogu zabiegów wg kategorii")
+            rows = ClinicAnalytics().treatment_category_report()
+            format_table(rows, [
+                ("category", "Kategoria", 16), ("treatments", "Zabiegi", 8),
+                ("active", "Aktywne", 8), ("total_price", "Suma cen", 10),
+                ("avg_price", "Śr. cena", 10), ("avg_duration", "Śr. czas", 9),
+            ])
+            input("\nNaciśnij Enter, aby kontynuować.")
         case 0 | "q" | "exit":
             print("Zamykanie programu. Do widzenia!")
             return False # Przypisuje wartość False do zmiennej 'running', tym samym kończąc działanie pętli
         case _:
-            print("Błąd: Wybierz wartość pomiędzy 0 a 8.")
+            print("Błąd: Wybierz wartość pomiędzy 0 a 13.")
     return True # Przypisuje wartość True do zmiennej 'running', kontynuując działanie pętli
 
 # Wyświetlenie menu
@@ -169,6 +224,11 @@ def print_menu():
     print("6. Dodaj pacjenta")
     print("7. Odczytaj pacjenta po ID")
     print("8. Wyświetl wszystkich pacjentów")
+    print("9. Raport pacjentów (wizyty i koszty)")
+    print("10. Raport według gatunków")
+    print("11. Przychód miesięczny")
+    print("12. Top pacjenci według kosztów")
+    print("13. Statystyki katalogu zabiegów")
     print("0. Wyjście z programu")
     print("-" * 40)
 
@@ -177,7 +237,7 @@ def main():
     running = True
     while running:
         print_menu()
-        user_choice = get_int_input("\nWprowadź swój wybór [0-8]: ", 0, 8)
+        user_choice = get_int_input("\nWprowadź swój wybór [0-13]: ", 0, 13)
         running = handle_menu_choice(user_choice)
 
 
