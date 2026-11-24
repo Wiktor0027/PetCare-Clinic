@@ -11,7 +11,7 @@ from sqlite_storage import (
 )
 from validators import get_int_input, get_non_empty_string, get_float_input
 from models import showCats, CATEGORIES, MAX_PRICE, CLASS_BY_ID
-from patient_repository import PatientRepository
+from patient_repository import PatientRepository, display_patient
 from analytics import ClinicAnalytics, format_table
 
 DATA_DIR = Path(__file__).resolve().parent / "data"
@@ -239,21 +239,6 @@ def main():
         print_menu()
         user_choice = get_int_input("\nWprowadź swój wybór [0-13]: ", 0, 13)
         running = handle_menu_choice(user_choice)
-
-
-def display_patient(patient):
-    print(f"\nID: {patient['patient_id']} | Pacjent: {patient['name']}")
-    print(f"Gatunek: {patient['species']} | Telefon właściciela: {patient['owner_phone']}")
-    if not patient["medical_visits"]:
-        print("Wizyty: brak")
-        return
-    print("Wizyty:")
-    for visit in patient["medical_visits"]:
-        status = "zakończona" if visit["is_completed"] else "niezakończona"
-        print(
-            f"  - {visit['visit_date']}: {visit['diagnosis']}; "
-            f"{visit['cost_pln']:.2f} zł; {status}"
-        )
 
 
 # Zapobiega samowolnemu uruchomieniu funkcji main() przy imporcie

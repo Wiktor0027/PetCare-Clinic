@@ -109,3 +109,17 @@ class PatientRepository:
                 return cursor.rowcount > 0
         finally:
             connection.close()
+
+def display_patient(patient):
+    print(f"\nID: {patient['patient_id']} | Pacjent: {patient['name']}")
+    print(f"Gatunek: {patient['species']} | Telefon właściciela: {patient['owner_phone']}")
+    if not patient["medical_visits"]:
+        print("Wizyty: brak")
+        return
+    print("Wizyty:")
+    for visit in patient["medical_visits"]:
+        status = "zakończona" if visit["is_completed"] else "niezakończona"
+        print(
+            f"  - {visit['visit_date']}: {visit['diagnosis']}; "
+            f"{visit['cost_pln']:.2f} zł; {status}"
+        )
